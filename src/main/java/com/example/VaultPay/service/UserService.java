@@ -20,6 +20,17 @@ public class UserService {
 
 
     public User registerUser(User user) {
+
+        // Check if email already exists
+        if (repo.existsByEmail(user.getEmail())) {
+            throw new RuntimeException("Email already registered");
+        }
+
+        // Check if username already exists
+        if (repo.existsByUsername(user.getUsername())) {
+            throw new RuntimeException("Username already taken");
+        }
+
         // Encode password
         user.setPassword(encoder.encode(user.getPassword()));
         user.setEmailVerified(false);
@@ -44,5 +55,35 @@ public class UserService {
         }
 
         return isValid;
+    }
+
+    public boolean userLogin(String username, String password){
+        User user = repo.findByUsername(username);
+        if(user == null){
+            return false;
+        }
+
+        if(!user.getEmailVerified()){
+            throw new RuntimeException("Email is not verified, please verify.");
+        }
+
+        // Verify password using BCrypt
+        return encoder.matches(password, user.getPassword());
+
+    }
+
+    // Resend OTP
+    public void resendOtp(String email) {
+        // Find the user
+        User user = repo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Check if user is already verified
+        if (user.getEmailVerified()) {
+            throw new RuntimeException("Email already verified");
+        }
+
+        // Generate and send new OTP
+        otpService.generateAndSendOtp(user);
     }
 }
