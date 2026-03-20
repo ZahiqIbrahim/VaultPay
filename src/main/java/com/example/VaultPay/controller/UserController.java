@@ -3,6 +3,7 @@ package com.example.VaultPay.controller;
 
 import com.example.VaultPay.dto.LoginRequest;
 import com.example.VaultPay.dto.ResetRequest;
+import com.example.VaultPay.dto.ResetRequestEmail;
 import com.example.VaultPay.model.User;
 import com.example.VaultPay.service.JwtService;
 import com.example.VaultPay.service.UserService;
@@ -83,7 +84,7 @@ public class UserController {
     }
 
     @PostMapping("/resetPassword-Request")
-    public ResponseEntity<?> resetPasswordRequest(@Valid @RequestBody ResetRequest request){
+    public ResponseEntity<?> resetPasswordRequest(@Valid @RequestBody ResetRequestEmail request){
         try {
             String email = request.getEmail();
             service.resetRequest(email);
