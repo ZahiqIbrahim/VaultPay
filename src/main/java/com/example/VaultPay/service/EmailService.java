@@ -15,11 +15,23 @@ public class EmailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("codeorg51@gmail.com");
         message.setTo(toEmail);
-        message.setSubject("ValutPay - Email Verification");
+        message.setSubject("VaultPay - Email Verification");
         message.setText("Your OTP for email verification is: " + otp +
                "\n\nThis OTP will expire in 5 minutes." +
                 "\n\nIf you didn't request this, please ignore.");
 
+        mailSender.send(message);
+
+    }
+
+    public void sendResetOtpEmail(String toEmail, String otp){
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("codeorg51@gmail.com");
+        message.setTo(toEmail);
+        message.setSubject("VaultPay - Reset Password");
+        message.setText("Your OTP for Password Reset is: "+ otp +
+                "\n\nThis OTP will expire in 5 minutes." +
+                "\n\nIf you didn't request this, please ignore.");
         mailSender.send(message);
 
     }

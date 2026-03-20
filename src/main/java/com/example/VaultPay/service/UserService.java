@@ -1,10 +1,14 @@
 package com.example.VaultPay.service;
 
 import com.example.VaultPay.dao.UserRepo;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.VaultPay.model.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -16,7 +20,6 @@ public class UserService {
     private OtpService otpService;
 
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
-
 
 
     public User registerUser(User user) {
@@ -42,6 +45,16 @@ public class UserService {
         otpService.generateAndSendOtp(savedUser);
 
         return savedUser;
+    }
+
+    @Transactional
+    public void changePassword(String email, String password){
+
+        User user = repo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setPassword(encoder.encode(password));
+        User savedUser = repo.save(user);
     }
 
     public boolean verifyUserEmail(String email, String otp) {
@@ -78,12 +91,20 @@ public class UserService {
         User user = repo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Check if user is already verified
-        if (user.getEmailVerified()) {
-            throw new RuntimeException("Email already verified");
-        }
-
         // Generate and send new OTP
         otpService.generateAndSendOtp(user);
+    }
+
+    public void resetRequest(String email){
+        Optional<User> userOpt = repo.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return;
+        }
+        User user = userOpt.get();
+        otpService.generateAndSendResetOtp(user);
+    }
+
+    public boolean verifyResetOtp(String email, String otp){
+        return otpService.verifyResetOtp(email, otp);
     }
 }

@@ -2,9 +2,11 @@ package com.example.VaultPay.controller;
 
 
 import com.example.VaultPay.dto.LoginRequest;
+import com.example.VaultPay.dto.ResetRequest;
 import com.example.VaultPay.model.User;
 import com.example.VaultPay.service.JwtService;
 import com.example.VaultPay.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,7 +32,7 @@ public class UserController {
     private JwtService jwtService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
+    public ResponseEntity<?> register(@Valid @RequestBody User user) {
         try {
             User registeredUser = service.registerUser(user);
             return ResponseEntity.ok(Map.of(
@@ -43,7 +45,7 @@ public class UserController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> verifyOtp(@Valid @RequestBody Map<String, String> request) {
         String email = request.get("email");
         String otp = request.get("otp");
 
@@ -56,20 +58,20 @@ public class UserController {
         }
     }
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest request){
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request){
         Authentication authentication = authenticationmanager
                 .authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
         if(authentication.isAuthenticated()){
-            return jwtService.generateToken(request.getUsername());
+            return ResponseEntity.ok(Map.of("JWT", jwtService.generateToken(request.getUsername())));
         }else{
-            return "Login Failed";
+            return ResponseEntity.badRequest().body(Map.of("error", "Login Failed"));
         }
 
     }
 
     @PostMapping("/resend-otp")
-    public ResponseEntity<?> resendOtp(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> resendOtp(@Valid @RequestBody Map<String, String> request) {
         try {
             String email = request.get("email");
             service.resendOtp(email);
@@ -78,6 +80,36 @@ public class UserController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
+    }
+
+    @PostMapping("/resetPassword-Request")
+    public ResponseEntity<?> resetPasswordRequest(@Valid @RequestBody ResetRequest request){
+        try {
+            String email = request.getEmail();
+            service.resetRequest(email);
+            return ResponseEntity.ok("Reset OTP sent successfully!");
+        }catch(RuntimeException e){
+            return ResponseEntity.badRequest().body("Error " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/resetPassword")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetRequest request){
+        try {
+            String email = request.getEmail();
+            String otp = request.getOtp();
+            boolean isVerified = service.verifyResetOtp(email, otp);
+            if (!isVerified) {
+                return ResponseEntity.badRequest().body("Error ");
+            }
+            String password = request.getNewPassword();
+            service.changePassword(email,password);
+            return ResponseEntity.ok("Password changed successfully!");
+
+        }catch(RuntimeException e) {
+            return ResponseEntity.badRequest().body("Error " + e.getMessage());
+        }
+
     }
 
 }
