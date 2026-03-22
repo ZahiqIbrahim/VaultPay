@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,9 +23,13 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private long jwtExpiration;
 
-    public String generateToken(String username){
+    @Value("${jwt.refresh.expiration}")
+    private long refreshExpiration;
+
+    public String generateAccessToken(String username){
 
         Map<String, Object> claims = new HashMap<>();
+        claims.put("type","access");
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -37,6 +38,18 @@ public class JwtService {
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getKey(), SignatureAlgorithm.HS256).compact();
 
+    }
+
+    public String generateRefreshToken(String username) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("type", "refresh");
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(username)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + refreshExpiration))
+                .signWith(getKey(), SignatureAlgorithm.HS256).compact();
     }
 
     private SecretKey getKey() {
@@ -61,6 +74,15 @@ public class JwtService {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    public boolean validateRefreshToken(String token) {
+        try {
+            Claims claims = extractAllClaims(token);
+            return "refresh".equals(claims.get("type")) && !isTokenExpired(token);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 

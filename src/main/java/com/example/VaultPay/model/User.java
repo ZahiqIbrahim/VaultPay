@@ -43,4 +43,6 @@ public class User {
     private Boolean emailVerified = false;
     private String verificationOtp;
     private LocalDateTime otpGeneratedTime;
+
+
 }

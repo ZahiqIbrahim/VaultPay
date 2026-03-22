@@ -43,9 +43,10 @@ public class SecurityConfig {
 
         http.csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/register","/verify", "/login","/resend-otp","/resetPassword-Request","/resetPassword")
+                        .requestMatchers("/register","/verify", "/login","/resend-otp","/resetPassword-Request","/resetPassword","/refresh")
                         .permitAll()
-                        .anyRequest().authenticated());
+                        .anyRequest().authenticated())
+                        .logout(logout -> logout.disable());
         //http.formLogin(Customizer.withDefaults());
         http.httpBasic(Customizer.withDefaults());
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

@@ -2,11 +2,15 @@ package com.example.VaultPay.controller;
 
 
 import com.example.VaultPay.dto.LoginRequest;
+import com.example.VaultPay.dto.RefreshTokenRequest;
 import com.example.VaultPay.dto.ResetRequest;
 import com.example.VaultPay.dto.ResetRequestEmail;
+import com.example.VaultPay.model.RefreshToken;
 import com.example.VaultPay.model.User;
 import com.example.VaultPay.service.JwtService;
+import com.example.VaultPay.service.RefreshTokenService;
 import com.example.VaultPay.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +19,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -31,6 +34,9 @@ public class UserController {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private RefreshTokenService refreshTokenService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody User user) {
@@ -64,11 +70,42 @@ public class UserController {
                 .authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
         if(authentication.isAuthenticated()){
-            return ResponseEntity.ok(Map.of("JWT", jwtService.generateToken(request.getUsername())));
+            String accessToken = jwtService.generateAccessToken(request.getUsername());
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(request.getUsername());
+
+            return ResponseEntity.ok(Map.of(
+                    "accessToken", accessToken,
+                    "refreshToken", refreshToken.getToken(),
+                    "tokenType", "Bearer"
+            ));
         }else{
             return ResponseEntity.badRequest().body(Map.of("error", "Login Failed"));
         }
 
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Refresh token is required"));
+        }
+
+        String refreshToken = authHeader.substring(7);
+
+        return refreshTokenService.findByToken(refreshToken)
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUser)
+                .map(user -> {
+                    String accessToken = jwtService.generateAccessToken(user.getUsername());
+                    return ResponseEntity.ok(Map.of(
+                            "accessToken", accessToken,
+                            "refreshToken", refreshToken,
+                            "tokenType", "Bearer"
+                    ));
+                })
+                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
     }
 
     @PostMapping("/resend-otp")
@@ -114,7 +151,19 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Token is required"));
+        }
+
+        String token = authHeader.substring(7);
+        String username = jwtService.extractUserName(token);
+
+        User user = service.findByUsername(username);
+        refreshTokenService.deleteByUser(user);
+
         return ResponseEntity.ok(Map.of("message", "Logout successful!"));
     }
 

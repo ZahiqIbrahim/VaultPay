@@ -19,6 +19,8 @@ public class UserService {
     @Autowired
     private OtpService otpService;
 
+
+
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
 
@@ -107,4 +109,13 @@ public class UserService {
     public boolean verifyResetOtp(String email, String otp){
         return otpService.verifyResetOtp(email, otp);
     }
+
+    public User findByUsername(String username) {
+        User user = repo.findByUsername(username);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        return user;
+    }
+
 }
