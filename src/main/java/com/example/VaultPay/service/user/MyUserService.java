@@ -1,9 +1,9 @@
-package com.example.VaultPay.service;
+package com.example.VaultPay.service.user;
 
 
 import com.example.VaultPay.dao.UserRepo;
-import com.example.VaultPay.model.User;
-import com.example.VaultPay.model.UserPrincipal;
+import com.example.VaultPay.model.user.User;
+import com.example.VaultPay.model.user.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

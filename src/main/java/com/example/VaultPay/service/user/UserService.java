@@ -1,13 +1,17 @@
-package com.example.VaultPay.service;
+package com.example.VaultPay.service.user;
 
 import com.example.VaultPay.dao.UserRepo;
+import com.example.VaultPay.dao.WalletRepo;
+import com.example.VaultPay.model.Wallet;
+import com.example.VaultPay.service.OtpService;
+import com.example.VaultPay.service.WalletService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.example.VaultPay.model.User;
+import com.example.VaultPay.model.user.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
@@ -19,11 +23,15 @@ public class UserService {
     @Autowired
     private OtpService otpService;
 
+    @Autowired
+    private WalletService walletService;
+
 
 
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
 
+    @Transactional
     public User registerUser(User user) {
 
         // Check if email already exists
@@ -42,6 +50,9 @@ public class UserService {
 
         // Save user
         User savedUser = repo.save(user);
+
+        //generate wallet for the user
+        walletService.createWallet(savedUser);
 
         // Generate and send OTP
         otpService.generateAndSendOtp(savedUser);

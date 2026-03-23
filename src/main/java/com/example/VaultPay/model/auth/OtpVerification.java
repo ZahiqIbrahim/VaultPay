@@ -1,19 +1,19 @@
-package com.example.VaultPay.model;
+package com.example.VaultPay.model.auth;
 
+import com.example.VaultPay.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name="password_reset")
+@Table(name="otp_verifications")
 @NoArgsConstructor
 @AllArgsConstructor
-public class PasswordReset {
+public class OtpVerification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +22,7 @@ public class PasswordReset {
     private String otp;
     private LocalDateTime generatedTime;
     private LocalDateTime expiryTime;
-    private boolean used = false;
+    private Boolean verified = false;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

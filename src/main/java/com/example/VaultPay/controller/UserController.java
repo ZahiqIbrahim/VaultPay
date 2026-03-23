@@ -2,14 +2,13 @@ package com.example.VaultPay.controller;
 
 
 import com.example.VaultPay.dto.LoginRequest;
-import com.example.VaultPay.dto.RefreshTokenRequest;
 import com.example.VaultPay.dto.ResetRequest;
 import com.example.VaultPay.dto.ResetRequestEmail;
-import com.example.VaultPay.model.RefreshToken;
-import com.example.VaultPay.model.User;
-import com.example.VaultPay.service.JwtService;
-import com.example.VaultPay.service.RefreshTokenService;
-import com.example.VaultPay.service.UserService;
+import com.example.VaultPay.model.auth.RefreshToken;
+import com.example.VaultPay.model.user.User;
+import com.example.VaultPay.service.jwt.JwtService;
+import com.example.VaultPay.service.jwt.RefreshTokenService;
+import com.example.VaultPay.service.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

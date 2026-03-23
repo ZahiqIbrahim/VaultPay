@@ -1,9 +1,8 @@
-package com.example.VaultPay.model;
+package com.example.VaultPay.model.auth;
 
 
-import jakarta.annotation.Nullable;
+import com.example.VaultPay.model.user.User;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,20 +1,19 @@
-package com.example.VaultPay.model;
+package com.example.VaultPay.model.auth;
 
+import com.example.VaultPay.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Generated;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name="otp_verifications")
+@Table(name="password_reset")
 @NoArgsConstructor
 @AllArgsConstructor
-public class OtpVerification {
+public class PasswordReset {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +22,7 @@ public class OtpVerification {
     private String otp;
     private LocalDateTime generatedTime;
     private LocalDateTime expiryTime;
-    private Boolean verified = false;
+    private boolean used = false;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

@@ -1,7 +1,7 @@
 package com.example.VaultPay.config;
 
-import com.example.VaultPay.service.JwtService;
-import com.example.VaultPay.service.MyUserService;
+import com.example.VaultPay.service.jwt.JwtService;
+import com.example.VaultPay.service.user.MyUserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

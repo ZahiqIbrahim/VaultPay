@@ -1,6 +1,6 @@
-package com.example.VaultPay.dao;
+package com.example.VaultPay.dao.auth;
 
-import com.example.VaultPay.model.OtpVerification;
+import com.example.VaultPay.model.auth.OtpVerification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,8 +1,7 @@
-package com.example.VaultPay.dao;
+package com.example.VaultPay.dao.auth;
 
-import com.example.VaultPay.model.RefreshToken;
-import com.example.VaultPay.model.User;
-import org.hibernate.type.descriptor.converter.spi.JpaAttributeConverter;
+import com.example.VaultPay.model.auth.RefreshToken;
+import com.example.VaultPay.model.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

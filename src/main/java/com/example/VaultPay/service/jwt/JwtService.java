@@ -1,4 +1,4 @@
-package com.example.VaultPay.service;
+package com.example.VaultPay.service.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

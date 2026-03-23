@@ -1,11 +1,10 @@
 package com.example.VaultPay.service;
 
-import com.example.VaultPay.dao.OtpVerificationRepo;
-import com.example.VaultPay.dao.ResetPasswordRepo;
-import com.example.VaultPay.model.OtpVerification;
-import com.example.VaultPay.model.PasswordReset;
-import com.example.VaultPay.model.User;
-import jakarta.validation.constraints.Email;
+import com.example.VaultPay.dao.auth.OtpVerificationRepo;
+import com.example.VaultPay.dao.auth.ResetPasswordRepo;
+import com.example.VaultPay.model.auth.OtpVerification;
+import com.example.VaultPay.model.auth.PasswordReset;
+import com.example.VaultPay.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;

@@ -1,15 +1,14 @@
-package com.example.VaultPay.service;
+package com.example.VaultPay.service.jwt;
 
-import com.example.VaultPay.dao.RefreshTokenRepo;
+import com.example.VaultPay.dao.auth.RefreshTokenRepo;
 import com.example.VaultPay.dao.UserRepo;
-import com.example.VaultPay.model.RefreshToken;
-import com.example.VaultPay.model.User;
+import com.example.VaultPay.model.auth.RefreshToken;
+import com.example.VaultPay.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Ref;
 import java.time.Instant;
 import java.util.Optional;
 
