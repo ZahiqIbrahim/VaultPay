@@ -7,5 +7,5 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Repository
 public interface TransactionRepo extends JpaRepository<Transaction, Long> {
-
+    Transaction findByFromUserId(Long fromUserId);
 }

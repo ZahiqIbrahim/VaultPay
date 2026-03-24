@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -33,5 +34,8 @@ public class Transaction {
     private String status; //Completed,Processing,Failed
 
     private String remarks;
+
+    private LocalDateTime createdTime;
+    private LocalDateTime completedTime;
 
 }

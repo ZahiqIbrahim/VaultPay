@@ -1,6 +1,7 @@
 package com.example.VaultPay.service;
 
 import com.example.VaultPay.dao.TransactionRepo;
+import com.example.VaultPay.dao.UserRepo;
 import com.example.VaultPay.model.Transaction;
 import com.example.VaultPay.model.Wallet;
 import com.example.VaultPay.model.user.User;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Service
 public class TransactionService {
@@ -23,6 +25,8 @@ public class TransactionService {
     @Autowired
     TransactionRepo transactionRepo;
 
+
+
     public Transaction createTransaction(String fromUsername, String toUsername, BigDecimal amount, String remarks){
         Transaction transaction = new Transaction();
         User fromUser = userService.findByUsername(fromUsername);
@@ -33,8 +37,15 @@ public class TransactionService {
         if(remarks != null){
             transaction.setRemarks(remarks);
         }
-        transaction.setStatus("Processing");
 
+
+        if(!walletService.checkBalance(fromUser,amount)){
+            transaction.setStatus("Failed");
+            transactionRepo.save(transaction);
+            throw new RuntimeException(" Insufficient balance");
+        }
+        transaction.setStatus("Processing");
+        transaction.setCreatedTime(LocalDateTime.now());
         return transactionRepo.save(transaction);
     }
 
@@ -53,6 +64,7 @@ public class TransactionService {
             User toUser = userService.findByUserId(toUserId);
             walletService.incrementBalance(toUser, amount);
             transaction.setStatus("Completed");
+            transaction.setCompletedTime(LocalDateTime.now());
             transactionRepo.save(transaction);
             // mail
             return transaction;
