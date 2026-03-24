@@ -129,4 +129,10 @@ public class UserService {
         return user;
     }
 
+    public User findByUserId(Long userId) {
+        User user = repo.findById(userId).
+                orElseThrow(() -> new RuntimeException("User Not found"));
+
+        return user;
+    }
 }
