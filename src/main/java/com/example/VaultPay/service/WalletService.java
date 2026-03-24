@@ -37,7 +37,6 @@ public class WalletService {
 
     public BigDecimal getBalance(User user) {
         Wallet wallet = getWallet(user);
-
         return wallet.getBalance();
     }
     public boolean checkBalance(User user, BigDecimal amount){

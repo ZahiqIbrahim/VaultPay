@@ -27,6 +27,9 @@ public class TransactionService {
     @Autowired
     TransactionRepo transactionRepo;
 
+    @Autowired
+    EmailService emailService;
+
 
 
     public Transaction createTransaction(String fromUsername, String toUsername, BigDecimal amount, String remarks){
@@ -36,10 +39,10 @@ public class TransactionService {
         transaction.setFromUserId(fromUser.getId());
         transaction.setToUserId(toUser.getId());
         transaction.setAmount(amount);
+
         if(remarks != null){
             transaction.setRemarks(remarks);
         }
-
 
         if(!walletService.checkBalance(fromUser,amount)){
             transaction.setStatus("Failed");
@@ -54,9 +57,11 @@ public class TransactionService {
     @Transactional
     public Transaction transfer(Transaction transaction){
 
-        try {Long fromUserId = transaction.getFromUserId();
+        try {
+            Long fromUserId = transaction.getFromUserId();
             Long toUserId = transaction.getToUserId();
             BigDecimal amount = transaction.getAmount();
+
             if (fromUserId.equals(toUserId)) {
                 throw new RuntimeException("Cannot transfer to yourself");
             }
@@ -65,12 +70,15 @@ public class TransactionService {
 
             User toUser = userService.findByUserId(toUserId);
             walletService.incrementBalance(toUser, amount);
+
             transaction.setStatus("Completed");
             transaction.setCompletedTime(LocalDateTime.now());
-            transactionRepo.save(transaction);
-            // mail
-            return transaction;
+            Transaction savedTransaction = transactionRepo.save(transaction);
 
+            // mail // this email happens asynchronously
+            emailService.sendTransferEmail(savedTransaction, fromUser, toUser);
+
+            return savedTransaction;
         } catch (Exception e) {
             transaction.setStatus("Failed");
             transactionRepo.save(transaction);
