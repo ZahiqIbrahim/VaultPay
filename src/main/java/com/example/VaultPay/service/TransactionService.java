@@ -1,9 +1,7 @@
 package com.example.VaultPay.service;
 
 import com.example.VaultPay.dao.TransactionRepo;
-import com.example.VaultPay.dao.UserRepo;
 import com.example.VaultPay.model.Transaction;
-import com.example.VaultPay.model.Wallet;
 import com.example.VaultPay.model.user.User;
 import com.example.VaultPay.service.user.UserService;
 import jakarta.transaction.Transactional;
@@ -12,6 +10,10 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class TransactionService {
@@ -75,5 +77,37 @@ public class TransactionService {
             throw e;
         }
 
+    }
+
+    public  List<Map<String, Object>> getTransactionHistory(User user) {
+        Long userId = user.getId();
+        List<Transaction> transactions = transactionRepo.findAllByUserId(userId);
+
+        List<Map<String, Object>> history = new ArrayList<>();
+
+        for (Transaction t : transactions) {
+            Map<String, Object> txn = new HashMap<>();
+            txn.put("transactionId", t.getId());
+            txn.put("amount", t.getAmount());
+            txn.put("status", t.getStatus());
+            txn.put("remarks", t.getRemarks());
+            txn.put("createdTime", t.getCreatedTime());
+            txn.put("completedTime", t.getCompletedTime());
+
+            // Add direction and other party
+            if (t.getFromUserId().equals(userId)) {
+                txn.put("type", "SENT");
+                User toUser = userService.findByUserId(t.getToUserId());
+                txn.put("otherParty", toUser.getUsername());
+            } else {
+                txn.put("type", "RECEIVED");
+                User fromUser = userService.findByUserId(t.getFromUserId());
+                txn.put("otherParty", fromUser.getUsername());
+            }
+
+            history.add(txn);
+        }
+
+        return history;
     }
 }
