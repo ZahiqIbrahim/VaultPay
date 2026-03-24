@@ -5,6 +5,7 @@ import com.example.VaultPay.dao.WalletRepo;
 import com.example.VaultPay.model.Wallet;
 import com.example.VaultPay.service.OtpService;
 import com.example.VaultPay.service.WalletService;
+import com.example.VaultPay.service.jwt.RefreshTokenService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.VaultPay.model.user.User;
@@ -25,6 +26,9 @@ public class UserService {
 
     @Autowired
     private WalletService walletService;
+
+    @Autowired
+    private RefreshTokenService refreshTokenService;
 
 
 
@@ -67,8 +71,11 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         user.setPassword(encoder.encode(password));
-        User savedUser = repo.save(user);
+        repo.save(user);
+        // Invalidate all refresh tokens for this user
+        refreshTokenService.deleteByUser(user);
     }
+
 
     public boolean verifyUserEmail(String email, String otp) {
         boolean isValid = otpService.verifyOtp(email, otp);

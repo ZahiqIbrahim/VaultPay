@@ -40,6 +40,7 @@ public class WalletService {
         return wallet.getBalance();
     }
     public boolean checkBalance(User user, BigDecimal amount){
+        //no locking
         Wallet wallet = getWallet(user);
         if(wallet.getBalance()==null){
             throw new RuntimeException("Balance is Null");
@@ -53,26 +54,35 @@ public class WalletService {
 
     @Transactional
     public BigDecimal deductBalance(User user, BigDecimal amount){
-        Wallet wallet = getWallet(user);
+        //Locked to prevent double spending
+        Wallet wallet = walletRepo.findByUserWithLock(user);
+
         BigDecimal balance = wallet.getBalance();
-            if(checkBalance(user, amount)){
+            if(wallet.getBalance().compareTo(amount) >= 0){
                 wallet.setBalance(balance.subtract(amount));
             }else{
                 throw new RuntimeException("Insufficient balance");
             }
             walletRepo.save(wallet);
-            // mail
+
         return wallet.getBalance();
     }
 
     @Transactional
     public BigDecimal incrementBalance(User user, BigDecimal amount){
-        Wallet wallet = getWallet(user);
+        //locked
+        Wallet wallet = walletRepo.findByUserWithLock(user);
+
+        if(wallet == null){
+            throw new RuntimeException("Wallet Not Found");
+        }
+
+
         BigDecimal balance = wallet.getBalance();
         wallet.setBalance(balance.add(amount));
 
         walletRepo.save(wallet);
-        // mail
+
         return wallet.getBalance();
     }
 }
