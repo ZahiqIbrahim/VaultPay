@@ -8,8 +8,13 @@ import com.example.VaultPay.model.user.User;
 import com.example.VaultPay.service.user.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -99,13 +104,21 @@ public class TransactionService {
 
     }
 
-    public  List<Map<String, Object>> getTransactionHistory(User user) {
+    public Page<Map<String, Object>> getTransactionHistory(User user, int page, int size) {
         Long userId = user.getId();
-        List<Transaction> transactions = transactionRepo.findAllByUserId(userId);
 
-        List<Map<String, Object>> history = new ArrayList<>();
+        // Create pageable with sorting (newest first)
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdTime").descending());
 
-        for (Transaction t : transactions) {
+        // Fetch paginated transactions
+        Page<Transaction> transactionPage = transactionRepo.findByFromUserIdOrToUserId(
+                userId,
+                userId,
+                pageable
+        );
+
+        // Map to response format
+        return transactionPage.map(t -> {
             Map<String, Object> txn = new HashMap<>();
             txn.put("transactionId", t.getId());
             txn.put("amount", t.getAmount());
@@ -125,9 +138,8 @@ public class TransactionService {
                 txn.put("otherParty", fromUser.getUsername());
             }
 
-            history.add(txn);
-        }
-
-        return history;
+            return txn;
+        });
     }
+
 }

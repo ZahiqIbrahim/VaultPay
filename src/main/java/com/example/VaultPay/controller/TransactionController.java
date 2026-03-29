@@ -7,13 +7,11 @@ import com.example.VaultPay.service.TransactionService;
 import com.example.VaultPay.service.user.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -45,15 +43,22 @@ public class TransactionController {
     }
 
     @GetMapping("/transaction-history")
-    public ResponseEntity<?> getTransactionHistory(@AuthenticationPrincipal UserDetails user){
+    public ResponseEntity<?> getTransactionHistory(@AuthenticationPrincipal UserDetails user,
+                                                   @RequestParam(defaultValue = "0") int page,
+                                                   @RequestParam(defaultValue = "10") int size){
         try{
             String username = user.getUsername();
             User currentUser = userService.findByUsername(username);
-            List<Map<String, Object>> history = transactionService.getTransactionHistory(currentUser);
+            Page<Map<String,Object>> historyPage = transactionService.getTransactionHistory(currentUser, page, size);
 
             return ResponseEntity.ok(Map.of(
-                    "transactions", history,
-                    "count", history.size()
+                    "transactions", historyPage.getContent(),
+                    "currentPage", historyPage.getNumber(),
+                    "totalPages", historyPage.getTotalPages(),
+                    "totalItems", historyPage.getTotalElements(),
+                    "pageSize", historyPage.getSize(),
+                    "hasNext", historyPage.hasNext(),
+                    "hasPrevious", historyPage.hasPrevious()
             ));
 
         }catch (Exception e){
