@@ -2,9 +2,11 @@ package com.example.VaultPay.model;
 
 import com.example.VaultPay.model.user.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.query.spi.Limit;
 
 import java.math.BigDecimal;
 
@@ -26,6 +28,7 @@ public class Wallet {
     @JoinColumn(name = "user_id")
     @OneToOne
     private User user;
-    //pin
+
+    private String pin;
 
 }

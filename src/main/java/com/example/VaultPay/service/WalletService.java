@@ -6,8 +6,10 @@ import com.example.VaultPay.model.Wallet;
 import com.example.VaultPay.model.user.User;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.beans.Encoder;
 import java.math.BigDecimal;
 
 @Service
@@ -15,6 +17,8 @@ public class WalletService {
 
     @Autowired
     private WalletRepo walletRepo;
+
+    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
     @Transactional
     public Wallet createWallet(User user){
@@ -30,7 +34,7 @@ public class WalletService {
         wallet = walletRepo.findByUser(user);
 
         if(wallet == null){
-           throw new RuntimeException("Wallet Not Found");
+           throw new RuntimeException(" Wallet Not Found");
         }
         return wallet;
     }
@@ -43,7 +47,7 @@ public class WalletService {
         //no locking
         Wallet wallet = getWallet(user);
         if(wallet.getBalance()==null){
-            throw new RuntimeException("Balance is Null");
+            throw new RuntimeException(" Balance is Null");
         }
         if(wallet.getBalance().compareTo(amount) >= 0){
             return true;
@@ -53,15 +57,13 @@ public class WalletService {
 
 
     @Transactional
-    public BigDecimal deductBalance(User user, BigDecimal amount){
-        //Locked to prevent double spending
-        Wallet wallet = walletRepo.findByUserWithLock(user);
+    public BigDecimal deductBalance(Wallet wallet, BigDecimal amount){
 
         BigDecimal balance = wallet.getBalance();
             if(wallet.getBalance().compareTo(amount) >= 0){
                 wallet.setBalance(balance.subtract(amount));
             }else{
-                throw new RuntimeException("Insufficient balance");
+                throw new RuntimeException(" Insufficient balance");
             }
             walletRepo.save(wallet);
 
@@ -74,9 +76,8 @@ public class WalletService {
         Wallet wallet = walletRepo.findByUserWithLock(user);
 
         if(wallet == null){
-            throw new RuntimeException("Wallet Not Found");
+            throw new RuntimeException(" Wallet Not Found");
         }
-
 
         BigDecimal balance = wallet.getBalance();
         wallet.setBalance(balance.add(amount));
@@ -84,5 +85,12 @@ public class WalletService {
         walletRepo.save(wallet);
 
         return wallet.getBalance();
+    }
+
+    @Transactional
+    public void setWalletPin(User user, String pin){
+        Wallet wallet = getWallet(user);
+        wallet.setPin(encoder.encode(pin));
+        walletRepo.save(wallet);
     }
 }

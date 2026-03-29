@@ -35,11 +35,11 @@ public class TransactionController {
             String toUserName = request.getToUserName();
             BigDecimal amount = request.getAmount();
             String remarks = request.getRemarks();
-
+            String pin = request.getPin();
             Transaction transaction = transactionService.createTransaction(fromUserName, toUserName, amount, remarks);
-            transactionService.transfer(transaction);
+            transactionService.transfer(transaction,pin);
         }catch (Exception e){
-            return ResponseEntity.badRequest().body("Error" + e.getMessage());
+            return ResponseEntity.badRequest().body("Error " + e.getMessage());
         }
         return ResponseEntity.ok("Transaction completed");
     }

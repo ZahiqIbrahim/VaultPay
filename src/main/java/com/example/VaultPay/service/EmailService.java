@@ -83,4 +83,17 @@ public class EmailService {
             throw new RuntimeException("Error Sending the email" + e.getMessage());
         }
     }
+
+    public void sendSetPinOtpEmail(String toEmail, String otp){
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(adminEmail);
+        message.setTo(toEmail);
+        message.setSubject("VaultPay - Email Verification");
+        message.setText("Your OTP for Setting the pin is: " + otp +
+                "\n\nThis OTP will expire in 5 minutes." +
+                "\n\nIf you didn't request this, please ignore.");
+
+        mailSender.send(message);
+
+    }
 }
