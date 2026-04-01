@@ -55,10 +55,10 @@ public class WalletService {
         return false;
     }
 
-
     @Transactional
     public BigDecimal deductBalance(Wallet wallet, BigDecimal amount){
 
+        wallet = walletRepo.save(wallet);
         BigDecimal balance = wallet.getBalance();
             if(wallet.getBalance().compareTo(amount) >= 0){
                 wallet.setBalance(balance.subtract(amount));

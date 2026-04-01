@@ -105,6 +105,13 @@
 		<scope>compile</scope>
 	</dependency>
 
+		<dependency>
+			<groupId>com.stripe</groupId>
+			<artifactId>stripe-java</artifactId>
+			<version>32.0.0</version>
+			<scope>compile</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
