@@ -93,4 +93,17 @@ public class WalletService {
         wallet.setPin(encoder.encode(pin));
         walletRepo.save(wallet);
     }
+
+    @Transactional
+    public void creditWalletFromDeposit(User user, BigDecimal amount) {
+        Wallet wallet = walletRepo.findByUserWithLock(user);
+
+        if (wallet == null) {
+            throw new RuntimeException("Wallet not found");
+        }
+
+        BigDecimal currentBalance = wallet.getBalance();
+        wallet.setBalance(currentBalance.add(amount));
+        walletRepo.save(wallet);
+    }
 }

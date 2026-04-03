@@ -43,7 +43,7 @@ public class SecurityConfig {
 
         http.csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/register","/verify", "/login","/resend-otp","/resetPassword-Request","/resetPassword","/refresh")
+                        .requestMatchers("/register","/verify", "/login","/resend-otp","/resetPassword-Request","/resetPassword","/refresh","/stripe")
                         .permitAll()
                         .anyRequest().authenticated())
                         .logout(logout -> logout.disable());

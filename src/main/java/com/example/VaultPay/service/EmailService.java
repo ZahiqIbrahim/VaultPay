@@ -1,6 +1,7 @@
 package com.example.VaultPay.service;
 
 import com.example.VaultPay.model.Transaction;
+import com.example.VaultPay.model.stripe.Deposit;
 import com.example.VaultPay.model.user.User;
 import com.example.VaultPay.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,5 +96,31 @@ public class EmailService {
 
         mailSender.send(message);
 
+    }
+
+    @Async
+    public void sendDepositSuccessEmail(Deposit deposit) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(adminEmail);
+            message.setTo(deposit.getUser().getEmail());
+            message.setSubject("Deposit Successful - VaultPay");
+            message.setText(String.format(
+                    "Hello %s,\n\n" +
+                            "Your deposit of $%s has been successfully processed!\n\n" +
+                            "Transaction ID: %s\n" +
+                            "Amount: $%s\n" +
+                            "Status: Completed\n\n" +
+                            "Your wallet has been credited.\n\n" +
+                            "Thank you for using VaultPay!",
+                    deposit.getUser().getUsername(),
+                    deposit.getAmount(),
+                    deposit.getId(),
+                    deposit.getAmount()
+            ));
+            mailSender.send(message);
+        } catch (Exception e) {
+            System.err.println("Failed to send deposit email: " + e.getMessage());
+        }
     }
 }

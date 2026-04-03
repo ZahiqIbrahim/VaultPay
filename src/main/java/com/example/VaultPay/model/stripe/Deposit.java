@@ -28,7 +28,7 @@ public class Deposit {
     private BigDecimal amount;
 
     @Column(nullable = false)
-    private String currency = "usd";
+    private String currency = "inr";
 
     @Column(nullable = false)
     private String status; // PENDING, COMPLETED, FAILED
