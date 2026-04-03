@@ -107,9 +107,9 @@ public class EmailService {
             message.setSubject("Deposit Successful - VaultPay");
             message.setText(String.format(
                     "Hello %s,\n\n" +
-                            "Your deposit of $%s has been successfully processed!\n\n" +
+                            "Your deposit of Rs%s has been successfully processed!\n\n" +
                             "Transaction ID: %s\n" +
-                            "Amount: $%s\n" +
+                            "Amount: Rs%s\n" +
                             "Status: Completed\n\n" +
                             "Your wallet has been credited.\n\n" +
                             "Thank you for using VaultPay!",

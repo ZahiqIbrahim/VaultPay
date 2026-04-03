@@ -39,15 +39,16 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http){
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http.csrf(customizer -> customizer.disable())
+        http.cors(Customizer.withDefaults())
+                .csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/register","/verify", "/login","/resend-otp","/resetPassword-Request","/resetPassword","/refresh","/stripe")
                         .permitAll()
                         .anyRequest().authenticated())
-                        .logout(logout -> logout.disable());
-        //http.formLogin(Customizer.withDefaults());
+                .logout(logout -> logout.disable());
+        
         http.httpBasic(Customizer.withDefaults());
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
