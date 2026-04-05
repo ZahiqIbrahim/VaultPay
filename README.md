@@ -357,7 +357,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ##  Author
 
-**Your Name**
 - GitHub: @ZahiqIbrahim(https://github.com/ZahiqIbrahim)
 - LinkedIn: https://www.linkedin.com/in/zahiq-ibrahim-414a23280/
 
