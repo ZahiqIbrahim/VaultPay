@@ -32,6 +32,7 @@ public class DepositController {
         try {
             User user = userService.findByUsername(userDetails.getUsername());
             DepositResponse response = stripePaymentService.createDepositIntent(user, request);
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest()

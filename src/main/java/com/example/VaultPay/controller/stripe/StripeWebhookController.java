@@ -22,9 +22,7 @@ public class StripeWebhookController {
     private String webhookSecret;
 
     @PostMapping("/stripe")
-    public ResponseEntity<String> handleStripeWebhook(
-            @RequestBody String payload,
-            @RequestHeader("Stripe-Signature") String sigHeader) {
+    public ResponseEntity<String> handleStripeWebhook(@RequestBody String payload, @RequestHeader("Stripe-Signature") String sigHeader) {
 
         Event event;
 

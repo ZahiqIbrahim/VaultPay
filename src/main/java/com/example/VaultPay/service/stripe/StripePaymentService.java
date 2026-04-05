@@ -6,16 +6,19 @@ import com.example.VaultPay.dto.stripe.DepositResponse;
 import com.example.VaultPay.model.stripe.Deposit;
 import com.example.VaultPay.model.stripe.StripeCustomer;
 import com.example.VaultPay.model.user.User;
+import com.example.VaultPay.service.WalletService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -27,9 +30,17 @@ public class StripePaymentService {
     @Autowired
     private StripeCustomerService stripeCustomerService;
 
+    @Autowired
+    private WalletService walletService;
+
+    @Value("${app.environment:prod}")
+    private String environment;
+
     @Transactional
     public DepositResponse createDepositIntent(User user, DepositRequest request) throws StripeException {
 
+        System.out.println("Current environment: " + environment);
+        
         StripeCustomer stripeCustomer = stripeCustomerService.getOrCreateStripeCustomer(user);
 
         // Convert amount to Paisa (Stripe uses smallest currency unit)
@@ -56,10 +67,32 @@ public class StripePaymentService {
         deposit.setUser(user);
         deposit.setAmount(request.getAmount());
         deposit.setCurrency(request.getCurrency());
-        deposit.setStatus("PENDING");
         deposit.setStripePaymentIntentId(paymentIntent.getId());
-        depositRepo.save(deposit);
 
+        // DEV MODE: Skip webhook and credit wallet immediately
+        if ("dev".equalsIgnoreCase(environment)) {
+            deposit.setStatus("COMPLETED");
+            deposit.setCompletedAt(LocalDateTime.now());
+            deposit.setStripeChargeId(paymentIntent.getId());
+            depositRepo.save(deposit);
+
+            // Credit wallet immediately in dev mode
+            walletService.creditWalletFromDeposit(user, request.getAmount());
+
+            System.out.println("DEV MODE: Wallet credited immediately for user: " + user.getUsername());
+
+            return new DepositResponse(
+                    paymentIntent.getClientSecret(),
+                    paymentIntent.getId(),
+                    request.getAmount(),
+                    request.getCurrency(),
+                    "COMPLETED"
+            );
+        }
+
+        // PROD MODE: Wait for webhook
+        deposit.setStatus("PENDING");
+        depositRepo.save(deposit);
 
         return new DepositResponse(
                 paymentIntent.getClientSecret(),
